@@ -1,0 +1,27 @@
+{
+    "version": "1.0.0",
+    "author": "hattmo",
+    "license": "GPL-3.0-or-later",
+    "name": "@hattmo/compositecalendarworker",
+    "description": "Worker service for the compositecalendar app",
+    "scripts": {
+        "test": "mocha -r ts-node/register --bail ./test/**/*Test.ts",
+        "build": "tsc --watch --project .",
+        "prepare": "tsc --project ."
+    },
+    "files": [
+        "/dist/"
+    ],
+    "bin": "./dist/bin/main.js",
+    "main": "./dist/lib/index.js",
+    "devDependencies": {
+        "@types/chai": "^4.2.7",
+        "@types/mocha": "^5.2.7",
+        "@types/node": "^13.1.7",
+        "chai": "^4.2.0",
+        "mocha": "^7.0.0",
+        "ts-node": "^8.6.2",
+        "tslint": "^5.20.1",
+        "typescript": "^3.7.4"
+    }
+}
