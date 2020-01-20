@@ -108,7 +108,6 @@ export const getEventsRecursive = async (
 ): Promise<IEvent[]> => {
     // tslint:disable-next-line: max-line-length
     const url = `https://www.googleapis.com/calendar/v3/calendars/${calId}/events?timeMin=${timeMin}&timeMax=${timeMax}` + (nextPageToken === undefined ? "" : `&pageToken=${nextPageToken}`);
-    console.log(url);
     const response = await fetch(url, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
