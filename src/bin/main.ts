@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
-import start from "../lib/index";
+import start from "../lib/updateCal";
 start();
