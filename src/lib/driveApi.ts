@@ -28,8 +28,15 @@ export default async (accessToken: string) => {
             });
             if (contentRes.ok) {
                 return await contentRes.json() as ISetting[];
+            }else{
+                console.log("Failed to read datafile");
             }
+        } else {
+            console.log("cannot file compositeCalendarData");
         }
+    } else {
+        console.log(listRes.statusText);
+        console.log("failed to list files");
     }
     return null;
 };

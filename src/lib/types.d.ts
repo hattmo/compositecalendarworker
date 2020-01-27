@@ -20,7 +20,6 @@ export interface ISetting {
 }
 
 export interface IEventList {
-
     "kind": "calendar#events",
     "etag": string,
     "summary": string,
@@ -37,7 +36,6 @@ export interface IEventList {
     "nextPageToken": string,
     "nextSyncToken": string,
     "items": IEvent[],
-
 }
 export interface IEvent {
     "kind": "calendar#event",

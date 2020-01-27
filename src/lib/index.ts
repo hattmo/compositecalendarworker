@@ -1,24 +1,27 @@
 import db from "./db";
 import getSettings from "./driveApi";
-import { getFilteredEvents } from "./calendarApis";
+import updateCal from "./updateCal";
+import { promisify } from "util";
+const sleep = promisify(setTimeout);
 
 export default async () => {
     const { getOldestAccount } = db();
-    const account = await getOldestAccount();
-    if (account !== null) {
-        const settings = await getSettings(account.accesstoken);
-        if (settings !== null) {
-            const newEvents = await getFilteredEvents(
-                settings[0].inputItems,
-                settings[0].startDate,
-                settings[0].endDate,
-                account.accesstoken,
-            );
-            console.log(newEvents);
-        } else {
-            console.log("no settings found");
+    while (true) {
+        try {
+            const account = await getOldestAccount();
+            if (account !== null) {
+                const settings = await getSettings(account.accesstoken);
+                if (settings !== null) {
+                    await Promise.all(settings.map(async (setting) => {
+                        return updateCal(setting, account.accesstoken);
+                    }));
+                }
+            } else {
+                await sleep(1000);
+            }
+        } catch (e) {
+            console.log("Failed to connect to DB will retry in 10s...");
+            await sleep(10000);
         }
-    } else {
-        console.log("no accounts ready for update");
     }
 };

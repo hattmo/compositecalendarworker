@@ -111,7 +111,7 @@ export const getEvents = async (
     if (events.nextPageToken !== undefined) {
         return [
             ...events.items,
-            ...(await getEventsRecursive(calId, timeMin, timeMax, accessToken, events.nextPageToken)),
+            ...(await getEvents(calId, startDate, endDate, accessToken, events.nextPageToken)),
         ];
     } else {
         return events.items;

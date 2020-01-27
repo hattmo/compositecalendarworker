@@ -31,14 +31,5 @@
     "dependencies": {
         "node-fetch": "^2.6.0",
         "pg": "^7.17.1"
-    },
-    "nodemonConfig": {
-        "env": {
-            "PGHOST": "localhost",
-            "PGUSER": "postgres",
-            "PGDATABASE": "postgres",
-            "PGPASSWORD": "password",
-            "PGPORT": "5432"
-        }
     }
 }
