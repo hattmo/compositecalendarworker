@@ -1,11 +1,19 @@
 import db from "./db";
-import getSettings from "./driveApi";
+import getSettings from "./getSettings";
 import updateCal from "./updateCal";
 import { promisify } from "util";
 const sleep = promisify(setTimeout);
 
+const { CLIENT_ID, CLIENT_SECRET } = process.env;
+
+if (!(CLIENT_ID && CLIENT_SECRET)) {
+    process.stderr.write("Environment variables not set\n");
+    process.exit(1);
+}
+
 export default async () => {
-    const { getOldestAccount } = db();
+    const { getOldestAccount } = db(CLIENT_ID, CLIENT_SECRET);
+    process.stdout.write("Worker started successfully\n");
     while (true) {
         try {
             const account = await getOldestAccount();
@@ -17,10 +25,10 @@ export default async () => {
                     }));
                 }
             } else {
-                await sleep(1000);
+                await sleep(10000);
             }
         } catch (e) {
-            console.log("Failed to connect to DB will retry in 10s...");
+            process.stderr.write("Failed to connect to DB will retry in 10s...\n");
             await sleep(10000);
         }
     }

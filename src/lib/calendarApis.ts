@@ -24,7 +24,7 @@ export const removeEventsFromOutput = async (
             if (res.ok) {
                 break;
             } else if (res.status === 403) {
-                await wait(2000);
+                await wait(200 * attempt);
             } else {
                 throw new Error("Error deleting events");
             }
@@ -59,7 +59,7 @@ export const addEventsToOutput = async (
             if (res.ok) {
                 break;
             } else if (res.status === 403) {
-                await wait(2000);
+                await wait(200 * attempt);
             } else {
                 throw new Error("Error adding events");
             }

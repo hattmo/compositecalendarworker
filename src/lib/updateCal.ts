@@ -15,7 +15,7 @@ export default async ({ startDate, endDate, inputItems, outputCal }: ISetting, a
         removeEventsFromOutput(outputCal, removeEvents, accessKey),
       ]);
     } catch {
-      console.log("Failed to sync calendars");
+      process.stderr.write("Failed to sync calendars\n");
     }
   }
 };
