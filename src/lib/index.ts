@@ -13,10 +13,8 @@ if (!(OAUTH_CLIENT_ID && OAUTH_CLIENT_SECRET && DB_CONNECTION)) {
 
 export default async () => {
     try {
-
         const { getOldestAccount } = await db(OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, DB_CONNECTION, DB_USERNAME, DB_PASSWORD);
         process.stdout.write("Worker started successfully\n");
-
         while (true) {
             try {
                 const account = await getOldestAccount();
@@ -32,13 +30,11 @@ export default async () => {
                     await sleep(1000);
                 }
             } catch (e) {
-                console.log(e)
                 process.stderr.write("Failed to connect to DB will retry in 10s...\n");
                 await sleep(10000);
             }
         }
     } catch (e) {
-        console.log(e)
-        console.error("Failed to connect to DB")
+        process.stderr.write("Failed to connect to DB\n")
     }
 };
