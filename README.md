@@ -8,15 +8,16 @@ Worker service for the compositecalendar app
 
 Set the following environment variables:
 
-* Postgress settings:
-  * PGHOST
-  * PGUSER
-  * PGDATABASE
-  * PGPASSWORD
-  * PGPORT
-* Google api settings:
-  * CLIENT_ID
-  * CLIENT_SECRET
+* Runtime Env
+  * OAUTH_CLIENT_ID
+  * OAUTH_CLIENT_SECRET
+  * DB_CONNECTION
+  * DB_USERNAME (Optional)
+  * DB_PASSWORD (Optional)
+* Build Env
+  * GOOGLE_CREDENTIALS
+  * DOCKERHUB_USERNAME
+  * DOCKERHUB_PASSWORD
 
 ## Author
 

@@ -1,12 +1,12 @@
-import pg from "pg";
 import fetch from "node-fetch";
+import { MongoClient, MongoClientOptions } from "mongodb";
 
 interface IAccount {
     id: string;
     accesstoken: string;
     refreshtoken: string;
-    lastupdate: string;
-    lastrefresh: string;
+    lastupdate: number;
+    lastrefresh: number;
 }
 
 interface IRefresh {
@@ -16,67 +16,44 @@ interface IRefresh {
     id_token: string;
 }
 
-export default (clientID: string, clientSecret: string) => {
-    const pool = new pg.Pool();
-    pool.on("error", () => {
-        process.stderr.write("DB Error...\n");
-    });
+export default async (clientID: string, clientSecret: string, dbconnection: string, dbusername?: string, dbpassword?: string) => {
+    const connectionSetting: MongoClientOptions = { }
+    if (dbusername !== undefined && dbpassword !== undefined) {
+        connectionSetting.auth = { user: dbusername, password: dbpassword }
+    }
+    const client = new MongoClient(dbconnection, connectionSetting);
+    const session = await client.connect();
     return {
         getOldestAccount: async () => {
-            const client = await pool.connect();
-            let returnVal: IAccount | null = null;
-            await client.query("BEGIN");
-            const accountsQuery = await client.query<IAccount>("SELECT * FROM accounts WHERE lastupdate = (SELECT MIN(lastupdate) FROM accounts);");
-            if (accountsQuery.rowCount === 1) {
-                const oldestAccount = accountsQuery.rows[0];
-                // Update every 10 seconds
-                if (((new Date()).getTime() - Number.parseInt(oldestAccount.lastupdate, 10)) > 10_000) {
-                    await client.query(
-                        "UPDATE accounts SET lastupdate=$1 WHERE id=$2",
-                        [(new Date()).getTime(), oldestAccount.id],
-                    );
-                    returnVal = oldestAccount;
-                }
-                // refresh the access token every 16 mins
-                if (((new Date()).getTime() - Number.parseInt(oldestAccount.lastrefresh, 10)) > 100_000) {
-                    await client.query(
-                        "UPDATE accounts SET lastrefresh=$1 WHERE id=$2",
-                        [(new Date()).getTime(), oldestAccount.id],
-                    );
-                    await client.query("COMMIT");
-                    try {
-                        const refreshRes = await fetch("https://oauth2.googleapis.com/token", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({
-                                client_id: clientID,
-                                client_secret: clientSecret,
-                                refresh_token: oldestAccount.refreshtoken,
-                                grant_type: "refresh_token",
-                            }),
-                        });
-                        await client.query("BEGIN");
-                        if (refreshRes.ok) {
-                            const refreshJson = (await refreshRes.json()) as IRefresh;
-                            await client.query(
-                                "UPDATE accounts SET accesstoken=$1 WHERE id=$2",
-                                [refreshJson.access_token, oldestAccount.id],
-                            );
-                            // await client.query(
-                            //     "UPDATE accounts SET accesstoken=$1 WHERE id=$2",
-                            //     [(new Date()).getTime(), oldestAccount.id],
-                            // );
-                        }
-                    } catch {
-                        process.stderr.write("Unable to refresh access token\n");
+            const currenttime = (new Date()).getTime();
+            const accounts = session.db("compositecalendar").collection<IAccount>("accounts");
+            const oldestAccount = (await accounts.findOneAndUpdate(
+                { lastupdate: { $gt: currenttime - 10_000 } },
+                { $set: { lastupdate: currenttime } },
+                { sort: { lastupdate: 1 } }
+            )).value;
+            if (oldestAccount !== null && oldestAccount !== undefined) {
+                if ((currenttime - oldestAccount.lastrefresh) > 100_000) {
+                    const refreshRes = await fetch("https://oauth2.googleapis.com/token", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            client_id: clientID,
+                            client_secret: clientSecret,
+                            refresh_token: oldestAccount.refreshtoken,
+                            grant_type: "refresh_token",
+                        }),
+                    });
+                    if (refreshRes.ok) {
+                        const refreshJson = (await refreshRes.json()) as IRefresh;
+                        accounts.updateOne({ id: oldestAccount.id }, { $set: { accesstoken: refreshJson.access_token } })
                     }
                 }
             }
-            await client.query("COMMIT");
-            client.release();
-            return returnVal;
+
+            return oldestAccount;
         },
     };
 };
