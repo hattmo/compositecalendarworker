@@ -41,7 +41,7 @@ resource "kubernetes_deployment" "app" {
     }
   }
   spec {
-    replicas = 0
+    replicas = 1
     selector {
       match_labels = {
         app = local.appname
@@ -58,12 +58,26 @@ resource "kubernetes_deployment" "app" {
           name  = local.appname
           image = local.imagename
           env {
-            CLIENT_ID = data.terraform_remote_state.infrastructure.outputs.oauth_client_id
-            CLIENT_SECRET = data.terraform_remote_state.infrastructure.outputs.oauth_client_secret
-            DB_CONNECTION = data.terraform_remote_state.infrastructure.outputs.db_connection
-            DB_USERNAME = data.terraform_remote_state.infrastructure.outputs.db_username
-            DB_PASSWORD = data.terraform_remote_state.infrastructure.outputs.db_password
+            name  = "DB_CONNECTION"
+            value = data.terraform_remote_state.infrastructure.outputs.db_connection
           }
+          env {
+            name  = "DB_USERNAME"
+            value = data.terraform_remote_state.infrastructure.outputs.db_username
+          }
+          env {
+            name  = "DB_PASSWORD"
+            value = data.terraform_remote_state.infrastructure.outputs.db_password
+          }
+          env {
+            name  = "OAUTH_CLIENT_ID"
+            value = data.terraform_remote_state.infrastructure.outputs.oauth_client_id
+          }
+          env {
+            name  = "OAUTH_CLIENT_SECRET"
+            value = data.terraform_remote_state.infrastructure.outputs.oauth_client_secret
+          }
+
         }
       }
     }

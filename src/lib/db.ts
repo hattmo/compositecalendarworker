@@ -22,11 +22,11 @@ export default async (clientID: string, clientSecret: string, dbconnection: stri
         connectionSetting.auth = { user: dbusername, password: dbpassword }
     }
     const client = new MongoClient(dbconnection, connectionSetting);
-    const session = await client.connect();
+    const conn = await client.connect();
     return {
         getOldestAccount: async () => {
             const currenttime = (new Date()).getTime();
-            const accounts = session.db("compositecalendar").collection<IAccount>("accounts");
+            const accounts = conn.db("compositecalendar").collection<IAccount>("accounts");
             const oldestAccount = (await accounts.findOneAndUpdate(
                 { lastupdate: { $gt: currenttime - 10_000 } },
                 { $set: { lastupdate: currenttime } },
