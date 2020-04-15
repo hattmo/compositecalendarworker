@@ -56,7 +56,7 @@ resource "kubernetes_deployment" "app" {
       spec {
         container {
           name  = local.appname
-          image = local.imagename
+          image = join(":",[local.imagename, local.version])
           env {
             name  = "DB_CONNECTION"
             value = data.terraform_remote_state.infrastructure.outputs.db_connection
