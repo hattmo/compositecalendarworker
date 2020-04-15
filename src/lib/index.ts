@@ -2,6 +2,7 @@ import db from "./db";
 import getSettings from "./getSettings";
 import updateCal from "./updateCal";
 import { promisify } from "util";
+
 const sleep = promisify(setTimeout);
 
 const {
@@ -20,21 +21,21 @@ if (!(OAUTH_CLIENT_ID && OAUTH_CLIENT_SECRET && DB_CONNECTION)) {
 export default async () => {
     let waiting = false;
     try {
-        const { getOldestAccount } = await db(OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, DB_CONNECTION, DB_USERNAME, DB_PASSWORD);
+        const { getOldestAccountCreds } = await db(OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, DB_CONNECTION, DB_USERNAME, DB_PASSWORD);
         process.stdout.write("Worker started successfully\n");
         while (true) {
             try {
-                const account = await getOldestAccount();
-                if (account !== undefined && account !== null) {
+                const oauth = await getOldestAccountCreds();
+                if (oauth) {
                     if (waiting) {
-                        process.stdout.write("Updating Accounts...");
+                        process.stdout.write("Updating Accounts...\n");
                         waiting = false;
                     }
-                    const settings = await getSettings(account.accesstoken);
-                    if (settings !== null) {
-                        await Promise.all(settings.map(async (setting) => {
-                            return updateCal(setting, account.accesstoken);
-                        }));
+                    try {
+                        const settings = await getSettings(oauth);
+                        await Promise.all(settings.map(async (setting) => updateCal(setting, oauth)));
+                    } catch {
+                        console.log("Did not update calendar")
                     }
                 } else {
                     if (!waiting) {

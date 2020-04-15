@@ -2,3 +2,4 @@
 /dist/
 nodemon.json
 /setEnv*
+/nodemon.json

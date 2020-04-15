@@ -1,59 +1,37 @@
-import fetch from "node-fetch";
+// import fetch from "node-fetch";
 import { MongoClient, MongoClientOptions } from "mongodb";
+import { google } from "googleapis";
+import { IAccountDocument } from "./types";
 
-interface IAccount {
-    id: string;
-    accesstoken: string;
-    refreshtoken: string;
-    lastupdate: number;
-    lastrefresh: number;
-}
-
-interface IRefresh {
-    access_token: string;
-    expires_in: number;
-    scope: string;
-    id_token: string;
-}
-
-export default async (clientID: string, clientSecret: string, dbconnection: string, dbusername?: string, dbpassword?: string) => {
-    const connectionSetting: MongoClientOptions = { }
+export default async (clientId: string, clientSecret: string, dbconnection: string, dbusername?: string, dbpassword?: string) => {
+    const connectionSetting: MongoClientOptions = {}
     if (dbusername !== undefined && dbpassword !== undefined) {
         connectionSetting.auth = { user: dbusername, password: dbpassword }
     }
     const client = new MongoClient(dbconnection, connectionSetting);
-    const conn = await client.connect();
+    const conn = (await client.connect()).db("compositecalendar");
     return {
-        getOldestAccount: async () => {
+        getOldestAccountCreds: async () => {
             const currenttime = (new Date()).getTime();
-            const accounts = conn.db("compositecalendar").collection<IAccount>("accounts");
+            const accounts = conn.collection<IAccountDocument>("accounts");
             const oldestAccount = (await accounts.findOneAndUpdate(
-                { lastupdate: { $gt: currenttime - 10_000 } },
-                { $set: { lastupdate: currenttime } },
-                { sort: { lastupdate: 1 } }
+                { lastUpdate: { $lt: currenttime - 10_000 } },
+                { $set: { lastUpdate: currenttime } },
+                { sort: { lastUpdate: 1 } },
             )).value;
-            if (oldestAccount !== null && oldestAccount !== undefined) {
-                if ((currenttime - oldestAccount.lastrefresh) > 100_000) {
-                    const refreshRes = await fetch("https://oauth2.googleapis.com/token", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            client_id: clientID,
-                            client_secret: clientSecret,
-                            refresh_token: oldestAccount.refreshtoken,
-                            grant_type: "refresh_token",
-                        }),
-                    });
-                    if (refreshRes.ok) {
-                        const refreshJson = (await refreshRes.json()) as IRefresh;
-                        accounts.updateOne({ id: oldestAccount.id }, { $set: { accesstoken: refreshJson.access_token } })
-                    }
-                }
+            if (!oldestAccount) {
+                return null;
             }
-
-            return oldestAccount;
+            const oauth = new google.auth.OAuth2({ clientId, clientSecret });
+            oauth.setCredentials(oldestAccount.credentials);
+            oauth.on("tokens", (tokens) => {
+                const { access_token, expiry_date, refresh_token } = tokens;
+                conn.collection<IAccountDocument>("accounts").update(
+                    { email: oldestAccount.email },
+                    { $set: { credentials: { access_token, expiry_date, refresh_token } } },
+                )
+            })
+            return oauth;
         },
     };
 };
