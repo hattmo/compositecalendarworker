@@ -1,4 +1,4 @@
-FROM node
+FROM node:12
 WORKDIR /app/
 COPY ./tsconfig.json ./
 COPY ./package.json ./
@@ -7,7 +7,7 @@ RUN npm ci --ignore-scripts
 COPY ./src ./src
 RUN npx tsc --project .
 
-FROM node
+FROM node:12
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
