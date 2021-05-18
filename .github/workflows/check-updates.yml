@@ -1,0 +1,26 @@
+name: Check Updates
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  Check_Updates:
+    name: Check Updates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+      - name: Update Dependencies
+        run: npx npm-check-updates -u
+      - name: Rebuild Package Lock
+        run: npm i --package-lock-only
+      - name: NPM Audit
+        run: npm audit fix --package-lock-only
+      - name: Commit Changes
+        uses: EndBug/add-and-commit@v7
+        with:
+          message: Updated Dependencies to new versions
