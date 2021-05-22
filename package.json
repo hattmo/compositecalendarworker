@@ -18,8 +18,8 @@
     "devDependencies": {
         "@types/chai": "^4.2.18",
         "@types/mocha": "^8.2.2",
-        "@types/mongodb": "^3.6.15",
-        "@types/node": "^15.3.1",
+        "@types/mongodb": "^3.6.16",
+        "@types/node": "^15.6.0",
         "@types/pg": "^8.6.0",
         "chai": "^4.3.4",
         "mocha": "^8.4.0",
@@ -31,6 +31,6 @@
     "dependencies": {
         "google-auth-library": "^7.0.4",
         "googleapis": "^73.0.0",
-        "mongodb": "^3.6.7"
+        "mongodb": "^3.6.8"
     }
 }
