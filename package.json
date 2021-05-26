@@ -30,7 +30,7 @@
     },
     "dependencies": {
         "google-auth-library": "^7.1.0",
-        "googleapis": "^74.0.0",
+        "googleapis": "^74.1.0",
         "mongodb": "^3.6.8"
     }
 }
