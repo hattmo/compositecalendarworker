@@ -18,7 +18,7 @@
     "devDependencies": {
         "@types/chai": "^4.2.18",
         "@types/mocha": "^8.2.2",
-        "@types/mongodb": "^3.6.16",
+        "@types/mongodb": "^3.6.17",
         "@types/node": "^15.6.1",
         "@types/pg": "^8.6.0",
         "chai": "^4.3.4",
