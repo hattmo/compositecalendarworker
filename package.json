@@ -29,7 +29,7 @@
         "typescript": "^4.3.2"
     },
     "dependencies": {
-        "google-auth-library": "^7.1.1",
+        "google-auth-library": "^7.1.2",
         "googleapis": "^76.0.0",
         "mongodb": "^3.6.9"
     }
