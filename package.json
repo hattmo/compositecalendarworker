@@ -19,7 +19,7 @@
         "@types/chai": "^4.2.21",
         "@types/mocha": "^8.2.3",
         "@types/mongodb": "^3.6.20",
-        "@types/node": "^16.3.1",
+        "@types/node": "^16.3.2",
         "@types/pg": "^8.6.1",
         "chai": "^4.3.4",
         "mocha": "^9.0.2",
@@ -31,6 +31,6 @@
     "dependencies": {
         "google-auth-library": "^7.3.0",
         "googleapis": "^81.0.0",
-        "mongodb": "^3.6.10"
+        "mongodb": "^4.0.0"
     }
 }
